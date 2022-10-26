@@ -1,1 +1,1 @@
-# Sigma-Internship-Pet-Project
+# Sigma-Internship-Pet-Project [![codecov](https://codecov.io/gh/MrZhenShen/Sigma-Internship-Pet-Project/branch/main/graph/badge.svg?token=ZF2D8H6EE1)](https://codecov.io/gh/MrZhenShen/Sigma-Internship-Pet-Project)
