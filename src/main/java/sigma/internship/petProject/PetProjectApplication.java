@@ -1,4 +1,4 @@
-package sigma.internship.PetProject;
+package sigma.internship.petProject;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

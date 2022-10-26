@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/internship
+    username: root
+    password: MS_union1908
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+springdoc:
+  packages-to-scan: software.sigma.internship.controller
+  paths-to-match: /**
