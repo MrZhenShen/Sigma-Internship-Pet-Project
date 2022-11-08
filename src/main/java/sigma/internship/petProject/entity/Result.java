@@ -1,7 +1,9 @@
 package sigma.internship.petProject.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -16,6 +18,8 @@ import java.math.BigDecimal;
 @Entity(name = "result")
 @Table(name = "result")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Result {
 

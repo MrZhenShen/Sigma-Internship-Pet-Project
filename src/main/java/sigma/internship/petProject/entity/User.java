@@ -1,7 +1,9 @@
 package sigma.internship.petProject.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -19,6 +21,8 @@ import java.time.LocalDateTime;
 @Entity(name = "end_user")
 @Table(name = "end_user")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class User {
 
