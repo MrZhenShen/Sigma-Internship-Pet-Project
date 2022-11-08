@@ -4,10 +4,6 @@ spring:
     username: root
     password: MS_union1908
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
 
 springdoc:
   packages-to-scan: software.sigma.internship.controller
