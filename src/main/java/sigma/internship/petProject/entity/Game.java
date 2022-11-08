@@ -1,19 +1,23 @@
 package sigma.internship.petProject.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.PrePersist;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity(name = "game")
 @Table(name = "game")
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
+@Builder
 public class Game {
 
     @Id
@@ -33,8 +37,8 @@ public class Game {
     @Column(name = "winning", nullable = false)
     private double winning;
 
-    @Column(name = "cost", nullable = false)
-    private double cost;
+    @Column(name = "cost", precision = 10, scale = 2, nullable = false)
+    private BigDecimal cost;
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;

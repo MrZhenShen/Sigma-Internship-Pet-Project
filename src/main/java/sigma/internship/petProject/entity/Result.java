@@ -1,18 +1,22 @@
 package sigma.internship.petProject.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+import java.math.BigDecimal;
 
 @Entity(name = "result")
 @Table(name = "result")
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
+@Builder
 public class Result {
 
     @Id
@@ -24,6 +28,6 @@ public class Result {
     @Enumerated(EnumType.STRING)
     private ResultType type;
 
-    @Column(name = "amount", nullable = false)
-    private double amount;
+    @Column(name = "amount", precision = 10, scale = 2, nullable = false)
+    private BigDecimal amount;
 }

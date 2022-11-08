@@ -1,20 +1,26 @@
 package sigma.internship.petProject.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
+import javax.persistence.PrePersist;
+import javax.persistence.OneToMany;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity(name = "game_session")
 @Table(name = "game_session")
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
+@Builder
 public class GameSession {
 
     @Id

@@ -1,18 +1,22 @@
 package sigma.internship.petProject.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.Builder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+import javax.persistence.JoinColumn;
+import java.math.BigDecimal;
 
 @Entity(name = "money_balance")
 @Table(name = "money_balance")
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
+@Builder
 public class MoneyBalance {
 
     @Id
@@ -24,6 +28,6 @@ public class MoneyBalance {
     @JoinColumn(name = "player_id", nullable = false, referencedColumnName = "id")
     private User player;
 
-    @Column(name = "amount", nullable = false)
-    private double amount;
+    @Column(name = "amount", precision = 10, scale = 2, nullable = false)
+    private BigDecimal amount;
 }
