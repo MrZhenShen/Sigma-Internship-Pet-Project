@@ -121,13 +121,13 @@
 				<version>${jacoco.version}</version>
 				<configuration>
 					<excludes>
-						<exclude>sigma/internship/PetProject/config/*</exclude>
-						<exclude>sigma/internship/PetProject/dto/*</exclude>
-						<exclude>sigma/internship/PetProject/entity/*</exclude>
-						<exclude>sigma/internship/PetProject/exception/*</exclude>
-						<exclude>sigma/internship/PetProject/mapper/*</exclude>
-						<exclude>sigma/internship/PetProject/repository/*</exclude>
-						<exclude>sigma/internship/PetProject/Main.class</exclude>
+						<exclude>sigma/internship/petProject/config/*</exclude>
+						<exclude>sigma/internship/petProject/dto/*</exclude>
+						<exclude>sigma/internship/petProject/entity/*</exclude>
+						<exclude>sigma/internship/petProject/exception/*</exclude>
+						<exclude>sigma/internship/petProject/mapper/*</exclude>
+						<exclude>sigma/internship/petProject/repository/*</exclude>
+						<exclude>sigma/internship/petProject/PetProjectApplication.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>
