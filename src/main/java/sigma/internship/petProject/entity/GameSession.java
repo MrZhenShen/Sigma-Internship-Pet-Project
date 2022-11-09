@@ -1,7 +1,9 @@
 package sigma.internship.petProject.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -20,6 +22,8 @@ import java.util.Set;
 @Entity(name = "game_session")
 @Table(name = "game_session")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class GameSession {
 
