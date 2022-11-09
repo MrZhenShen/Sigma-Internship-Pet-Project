@@ -1,14 +1,16 @@
 version: '3.8'
 services:
-  db:
-    image: mysql
-    ports:
-      - 3306:3306
-    restart: always
+  mysql:
+    image: mysql:8.0.21
     environment:
-      MYSQL_DATABASE: internship
-      MYSQL_ROOT_PASSWORD: root
-
-volumes:
-  db:
-    driver: local
+      MYSQL_ROOT_PASSWORD: "root_password"
+      MYSQL_DATABASE: "internship"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+    ports: [ "3306:3306" ]
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      start_period: 5s
+      interval: 1s
+      timeout: 5s
+      retries: 99

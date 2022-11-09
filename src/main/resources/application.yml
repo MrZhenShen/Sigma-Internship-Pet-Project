@@ -1,9 +1,15 @@
 spring:
+  liquibase:
+    enabled: true
+    change-log: classpath:liquibase/changelog-master.xml
+
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/internship
-    username: root
-    password: MS_union1908
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/internship
+    username: user
+    password: password
+    hikari:
+      register-mbeans: true
 
 springdoc:
   packages-to-scan: software.sigma.internship.controller
