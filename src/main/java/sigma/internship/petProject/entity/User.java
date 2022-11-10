@@ -19,7 +19,7 @@ import javax.persistence.EnumType;
 import java.time.LocalDateTime;
 
 @Entity(name = "end_user")
-@Table(name = "end_user")
+@Table(name = "end_user", schema = "public")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
