@@ -125,4 +125,24 @@
         <addForeignKeyConstraint baseColumnNames="round_id" baseTableName="round" constraintName="FK_ROUND_ON_ROUND"
                                  referencedColumnNames="id" referencedTableName="game_session"/>
     </changeSet>
+
+    <changeSet author="yevhen-rozhylo" id="2-create-default-users">
+        <insert tableName="end_user">
+            <column name="username" value="admin"/>
+            <column name="email" value="admin@email.com"/>
+            <column name="password" value="$2a$12$YCssqgHd6r5pe35ABugi1up4h26csHj6IKQqd5ILA9O8djDmNsL3a"/>
+            <column name="role" value="ADMIN"/>
+            <column name="update_date" valueDate="current_timestamp"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+        <insert tableName="end_user">
+            <column name="username" value="user"/>
+            <column name="email" value="user@email.com"/>
+            <column name="password" value="$2a$12$sT0JcikHHA4gBE6kIprzf.XW3sFoUq/YugE8fWZzeuxSslP8clCju"/>
+            <column name="role" value="USER"/>
+            <column name="update_date" valueDate="current_timestamp"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
