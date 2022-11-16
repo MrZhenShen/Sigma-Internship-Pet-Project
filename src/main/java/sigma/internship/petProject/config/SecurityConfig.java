@@ -17,16 +17,25 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_MATCHERS = {
-            "/"
+            "/",
+            "/game/**",
+            "/user"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
-                .antMatcher("/**").authorizeRequests()
+                .antMatcher("/**")
+                .authorizeRequests()
                 .antMatchers(PUBLIC_MATCHERS).permitAll()
                 .anyRequest().authenticated()
-                .and().httpBasic(withDefaults())
+                .and()
+                .logout()
+                .logoutUrl("/user/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .and()
+                .httpBasic(withDefaults())
                 .build();
     }
 

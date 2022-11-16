@@ -20,11 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("Started retrieving user data with username: {}", username);
+        log.info("Started retrieving user data with \"{}\" username", username);
         User user = userRepository
                 .findByUsername(username)
                 .orElseThrow(() -> {
-                    log.error("Error with retrieving user with username: {}", username);
+                    log.error("Error with retrieving user with \"{}\" username", username);
                     throw new UsernameNotFoundException("User details not found for the user " + username);
                 });
         log.info("User with username: {} was successfully retrieved", username);
