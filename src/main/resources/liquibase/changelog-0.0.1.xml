@@ -145,4 +145,11 @@
         </insert>
     </changeSet>
 
+    <changeSet author="yevhen-rozhylo" id="3-update-user-password">
+        <update tableName="end_user">
+            <column name="password" value="$2a$12$9RcowX5mABLH5Es3PboCB.anLfipjlTs1qrwC152L21fyLYnQ7oU2"/>
+            <where>username='user'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
