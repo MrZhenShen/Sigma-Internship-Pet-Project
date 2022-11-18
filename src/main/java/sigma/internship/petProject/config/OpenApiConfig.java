@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public OpenAPI springShopOpenAPI(BuildProperties buildProperties) {
         return new OpenAPI().info(
                 new Info()
-                        .title("petProject API")
+                        .title("PetProject API")
                         .description("Sigma Internship Pet-Project")
                         .version(buildProperties.getVersion())
         );

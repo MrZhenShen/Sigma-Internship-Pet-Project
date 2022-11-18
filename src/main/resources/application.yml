@@ -12,5 +12,5 @@ spring:
       register-mbeans: true
 
 springdoc:
-  packages-to-scan: software.sigma.internship.controller
+  packages-to-scan: sigma.internship.petProject.controller
   paths-to-match: /**
