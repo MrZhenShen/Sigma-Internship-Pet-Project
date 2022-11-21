@@ -1,0 +1,1 @@
+DELETE FROM end_user;

@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sigma.internship.petProject.dto.AuthUserDto;
 import sigma.internship.petProject.dto.UserDto;
+import sigma.internship.petProject.entity.Role;
 import sigma.internship.petProject.entity.User;
 import sigma.internship.petProject.exception.WebException;
 import sigma.internship.petProject.mapper.UserMapper;
@@ -26,12 +27,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto register(AuthUserDto user) {
-        log.info("Starting creating new user: {}", user);
+        log.info("Starting creating new user: {}", user.username());
         if (checkIfUserExist(user.username())) {
             log.error("Such user already exists");
             throw new WebException(HttpStatus.CONFLICT, "User already exists");
         }
         User userEntity = userMapper.toUser(user);
+        userEntity.setRole(Role.USER);
+
         encodePassword(userEntity, user);
 
         User newUser = userRepository.save(userEntity);
@@ -42,13 +45,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkIfUserExist(String username) {
-        log.info("Start checking if user with \"{}\" username exists", username);
+        log.info("Starting checking if user with \"{}\" username exists", username);
         return userRepository.findByUsername(username).isPresent();
     }
 
     @Override
     public UserDto getUserByUsername(String username) {
-        log.info("Staring retrieving user with \"{}\" username", username);
+        log.info("Starting retrieving user with \"{}\" username", username);
         return userRepository.findByUsername(username)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> {
