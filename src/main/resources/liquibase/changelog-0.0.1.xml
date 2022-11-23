@@ -156,5 +156,32 @@
         <dropTable tableName="twit"/>
     </changeSet>
 
+    <changeSet author="yevhen-rozhylo" id="5-insert-default-games">
+        <insert tableName="game">
+            <column name="title" value="Spin"/>
+            <column name="description" value="Spin the spin and get one of the prizes"/>
+            <column name="is_one_user_action" valueBoolean="true"/>
+            <column name="winning" valueNumeric="0.5"/>
+            <column name="cost" valueNumeric="10"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+        <insert tableName="game">
+            <column name="title" value="Ticket"/>
+            <column name="description" value="Wipe cells to get prise"/>
+            <column name="is_one_user_action" valueBoolean="false"/>
+            <column name="winning" valueNumeric="0.8"/>
+            <column name="cost" valueNumeric="50"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+        <insert tableName="game">
+            <column name="title" value="Lot"/>
+            <column name="description" value="3 cherries are the best your friends"/>
+            <column name="is_one_user_action" valueBoolean="true"/>
+            <column name="winning" valueNumeric="0.1"/>
+            <column name="cost" valueNumeric="100"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+    </changeSet>
+
 
 </databaseChangeLog>
