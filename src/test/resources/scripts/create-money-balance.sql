@@ -1,4 +1,3 @@
 INSERT INTO money_balance
 (player_id, amount)
-VALUES
-(2, 0.0);
+SELECT id, 0.0 FROM end_user WHERE username LIKE 'userTest';

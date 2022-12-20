@@ -31,8 +31,8 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
         User user = getUser();
 
         MoneyBalance moneyBalance = getMoneyBalanceByUserId(user.getId());
-        if (amount == 0) {
-            log.info("Deposit is 0 USD from user: {}", user.getUsername());
+        if (amount < 1) {
+            log.info("Deposit is {} USD that is less than 0 from user: {}", amount, user.getUsername());
             throw new WebException(HttpStatus.PAYMENT_REQUIRED, "Issue with updating money balance");
         }
 
@@ -62,7 +62,7 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
     }
 
     private MoneyBalance getMoneyBalanceByUserId(long id) {
-        log.info("Starting retrieving user's money balance");
+        log.info("Starting retrieving user's money balance: {}", id);
         Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(id);
         if (moneyBalanceOptional.isEmpty()) {
             log.error("Money balance is not found");
