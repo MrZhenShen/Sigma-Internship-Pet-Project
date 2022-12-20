@@ -8,13 +8,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import sigma.internship.petProject.entity.MoneyBalance;
+import sigma.internship.petProject.dto.MoneyBalanceDto;
+import sigma.internship.petProject.service.MoneyBalanceService;
 
 @Tag(name = "Money Balance controller")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/money-balance")
 public class MoneyBalanceController {
+
+    private final MoneyBalanceService moneyBalanceService;
 
     @Operation(summary = "Deposit money to authorized user")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -23,7 +26,7 @@ public class MoneyBalanceController {
     })
     @PreAuthorize("hasAnyAuthority('USER')")
     @PostMapping("/deposit")
-    public MoneyBalance deposit(@RequestParam(value = "amount") double amount) {
-        return new MoneyBalance();
+    public MoneyBalanceDto deposit(@RequestParam(value = "amount") double amount) {
+        return moneyBalanceService.deposit(amount);
     }
 }
