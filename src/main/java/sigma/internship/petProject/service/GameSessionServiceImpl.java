@@ -56,7 +56,7 @@ public class GameSessionServiceImpl implements GameSessionService {
 
     private void validateMoneyBalance(BigDecimal gameCost, int roundAmount, User user) {
         log.info("Starting validating user's money balance");
-        Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByUserId(user.getId());
+        Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(user.getId());
         if (moneyBalanceOptional.isEmpty()) {
             log.error("Money balance for user with id \"{}\" is not found", user.getId());
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving user's money balance");

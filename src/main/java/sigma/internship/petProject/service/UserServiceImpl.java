@@ -7,12 +7,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sigma.internship.petProject.dto.AuthUserDto;
 import sigma.internship.petProject.dto.UserDto;
+import sigma.internship.petProject.entity.MoneyBalance;
 import sigma.internship.petProject.entity.Role;
 import sigma.internship.petProject.entity.User;
 import sigma.internship.petProject.exception.WebException;
 import sigma.internship.petProject.mapper.UserMapper;
+import sigma.internship.petProject.repository.MoneyBalanceRepository;
 import sigma.internship.petProject.repository.UserRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,14 +25,15 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final MoneyBalanceRepository moneyBalanceRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDto register(AuthUserDto user) {
-        log.info("Starting creating new user: {}", user.username());
+        log.info("Starting creating new user");
         if (checkIfUserExist(user.username())) {
-            log.error("Such user already exists");
+            log.error("{} user already exists", user.username());
             throw new WebException(HttpStatus.CONFLICT, "User already exists");
         }
         User userEntity = userMapper.toUser(user);
@@ -38,7 +42,15 @@ public class UserServiceImpl implements UserService {
         encodePassword(userEntity, user);
 
         User newUser = userRepository.save(userEntity);
-        log.info("User was successfully created: {}", newUser);
+        log.info("New user was successfully created");
+
+        moneyBalanceRepository.save(MoneyBalance
+                .builder()
+                .player(userEntity)
+                .amount(BigDecimal.valueOf(0))
+                .build());
+
+        log.info("Money balance for new user was successfully created");
 
         return userMapper.toDto(newUser);
     }

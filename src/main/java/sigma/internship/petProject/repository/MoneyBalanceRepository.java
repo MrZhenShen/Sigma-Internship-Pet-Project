@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface MoneyBalanceRepository extends JpaRepository<MoneyBalance, Long> {
 
-    Optional<MoneyBalance> findByUserId(Long userId);
+    Optional<MoneyBalance> findByPlayerId(Long userId);
 }
