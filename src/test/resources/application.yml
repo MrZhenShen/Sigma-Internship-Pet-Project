@@ -1,4 +1,7 @@
 spring:
+  liquibase:
+    enabled: false
+
   datasource:
     url: jdbc:hsqldb:mem:testdb;sql.syntax_mys=true;sql.lowercase_ident=true;DB_CLOSE_DELAY=-1;
     username: sa
