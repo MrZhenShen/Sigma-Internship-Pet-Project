@@ -48,11 +48,18 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
         return moneyBalanceMapper.moneyBalanceToMoneyBalanceDto(updatedMoneyBalance);
     }
 
+    @Override
+    public MoneyBalanceDto findMoneyBalance() {
+        return moneyBalanceMapper.moneyBalanceToMoneyBalanceDto(getMoneyBalanceByUserId(getUser().getId()));
+    }
+
     private User getUser() {
         UserDetails authenticatedUser = (UserDetails) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
+
+        log.info("Starting retrieving user");
         Optional<User> userOptional = userRepository.findByUsername(authenticatedUser.getUsername());
         if (userOptional.isEmpty()) {
             log.error("\"{}\" - user is not found", authenticatedUser.getUsername());
@@ -62,10 +69,10 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
     }
 
     private MoneyBalance getMoneyBalanceByUserId(long id) {
-        log.info("Starting retrieving user's money balance: {}", id);
+        log.info("Starting retrieving user's money balance");
         Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(id);
         if (moneyBalanceOptional.isEmpty()) {
-            log.error("Money balance is not found");
+            log.error("Money balance is not found for user with id: {}", id);
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving money balance");
         }
         return moneyBalanceOptional.get();
