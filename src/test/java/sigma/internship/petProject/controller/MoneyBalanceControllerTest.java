@@ -5,16 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
 
-import javax.servlet.ServletContext;
-import java.net.URI;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,7 +37,7 @@ public class MoneyBalanceControllerTest {
     public class Deposit {
 
         @Test
-        void Should_Fail_When_ReturnIsNull() throws Exception {
+        void Should_Fail_When_RespondIsNull() throws Exception {
             mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
                     .andDo(print())
                     .andExpect(status().isAccepted())
@@ -219,6 +215,28 @@ public class MoneyBalanceControllerTest {
             mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=9"))
                     .andDo(print())
                     .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    public class View {
+
+        @Test
+        @WithMockUser(authorities = "USER", username = "userTest")
+        void Should_Fail_When_RespondIsNull() throws Exception {
+            mockMvc.perform(get("/money-balance"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").exists());
+        }
+
+        @Test
+        @WithMockUser(authorities = "USER", username = "userTest")
+        void Should_Success_When_TryToView() throws Exception {
+            mockMvc.perform(get("/money-balance"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.amount").value("0.0"));
         }
     }
 
