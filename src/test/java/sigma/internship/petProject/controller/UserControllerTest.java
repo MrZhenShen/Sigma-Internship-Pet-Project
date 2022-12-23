@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import sigma.internship.petProject.dto.AuthUserDto;
@@ -30,13 +32,15 @@ public class UserControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    private static final String REQUEST_MAPPING = "/user";
+
     @Nested
     public class Registration {
         @Test
         void Should_ReturnBadRequest_When_AuthUserDtoHasAllEmptyFields() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "", "", "");
 
-            mockMvc.perform(post("/user")
+            mockMvc.perform(post(REQUEST_MAPPING)
                             .content(objectMapper.writeValueAsString(user))
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
@@ -49,7 +53,7 @@ public class UserControllerTest {
         void Should_ReturnBadRequest_When_AuthUserDtoHasTwoEmptyField() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "Joe", "", "");
 
-            mockMvc.perform(post("/user")
+            mockMvc.perform(post(REQUEST_MAPPING)
                             .content(objectMapper.writeValueAsString(user))
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
@@ -62,7 +66,7 @@ public class UserControllerTest {
         void Should_ReturnBadRequest_When_AuthUserDtoHasOneEmptyField() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "Joe", "joe@email.com", "");
 
-            mockMvc.perform(post("/user")
+            mockMvc.perform(post(REQUEST_MAPPING)
                             .content(objectMapper.writeValueAsString(user))
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
@@ -75,7 +79,7 @@ public class UserControllerTest {
         void Should_ReturnBadRequest_When_AuthUserDtoHasInvalidEmail() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "Joe", "joe.email.com", "joe");
 
-            mockMvc.perform(post("/user")
+            mockMvc.perform(post(REQUEST_MAPPING)
                             .content(objectMapper.writeValueAsString(user))
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
@@ -88,7 +92,7 @@ public class UserControllerTest {
         void Should_ReturnUserDto_When_AuthUserDtoIsValid() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "Joe", "joe@email.com", "joe");
 
-            mockMvc.perform(post("/user")
+            mockMvc.perform(post(REQUEST_MAPPING)
                             .content(objectMapper.writeValueAsString(user))
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
@@ -111,9 +115,11 @@ public class UserControllerTest {
         String adminPassword = "admin";
         String adminRole = "ADMIN";
 
+        private static final String LOGIN_REQUEST_SUBMAPPING = REQUEST_MAPPING + "/login";
+
         @Test
         void Should_ReturnUserFullDto_When_UserIsValid() throws Exception {
-            mockMvc.perform(get("/user/login")
+            mockMvc.perform(get(LOGIN_REQUEST_SUBMAPPING)
                             .with(httpBasic(userUsername, userPassword)))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -125,7 +131,7 @@ public class UserControllerTest {
 
         @Test
         void Should_ReturnUserFullDto_When_AdminIsValid() throws Exception {
-            mockMvc.perform(get("/user/login")
+            mockMvc.perform(get(LOGIN_REQUEST_SUBMAPPING)
                             .with(httpBasic(adminUsername, adminPassword)))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -133,6 +139,40 @@ public class UserControllerTest {
                     .andExpect(jsonPath("$.role").value(adminRole))
                     .andExpect(jsonPath("$.id", notNullValue()));
 
+        }
+    }
+
+    @Nested
+    public class ViewAll {
+
+        private static final String ALL_REQUEST_SUBMAPPING = REQUEST_MAPPING + "/all";
+
+        @Test
+        @WithMockUser(authorities = "ADMIN")
+        void Should_ReturnAllUsers_When_isAdmin() throws Exception {
+            mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content.size()").value(2))
+            ;
+        }
+
+        @Test
+        @WithMockUser(authorities = "USER")
+        void Should_Fail_When_isUser() throws Exception {
+            mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
+                    .andDo(print())
+                    .andExpect(status().isForbidden())
+            ;
+        }
+
+        @Test
+        @WithAnonymousUser
+        void Should_Fail_When_isAnonymousUser() throws Exception {
+            mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+            ;
         }
     }
 }
