@@ -33,7 +33,7 @@ public class MoneyBalanceControllerTest {
     private static final String MOCK_USER_ROLE = "USER";
 
     @Nested
-    @WithMockUser(authorities = "USER", username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
+    @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
     public class Deposit {
 
         @Test
@@ -222,7 +222,7 @@ public class MoneyBalanceControllerTest {
     public class View {
 
         @Test
-        @WithMockUser(authorities = "USER", username = "userTest")
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_Fail_When_RespondIsNull() throws Exception {
             mockMvc.perform(get("/money-balance"))
                     .andDo(print())
@@ -231,7 +231,7 @@ public class MoneyBalanceControllerTest {
         }
 
         @Test
-        @WithMockUser(authorities = "USER", username = "userTest")
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_Success_When_TryToView() throws Exception {
             mockMvc.perform(get("/money-balance"))
                     .andDo(print())
@@ -260,7 +260,7 @@ public class MoneyBalanceControllerTest {
         }
 
         @Test
-        @WithMockUser(authorities = "USER", username = "userTest")
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_Success_When_UserHasDefaultUserRole() throws Exception {
             mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
                     .andDo(print())
