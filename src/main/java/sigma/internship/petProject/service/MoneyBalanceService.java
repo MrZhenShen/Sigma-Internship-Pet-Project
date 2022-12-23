@@ -6,5 +6,7 @@ public interface MoneyBalanceService {
 
     MoneyBalanceDto deposit(double amount);
 
+    MoneyBalanceDto withdraw(double amount);
+
     MoneyBalanceDto findMoneyBalance();
 }

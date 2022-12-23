@@ -18,15 +18,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(scripts = {"/scripts/create-users.sql", "/scripts/create-money-balance.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/scripts/create-money-balance.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"/scripts/clear-money-balance.sql", "/scripts/clear-user.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class MoneyBalanceControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    private static final String REQUEST_MAPPING = "/money-balance";
+
+    private static final String MOCK_USER_WITH_MONEY = "userWithMoney";
+    private static final String MOCK_USER_WITHOUT_MONEY = "userWithoutMoney";
+    private static final String MOCK_USER_PASSWORD = "user";
+    private static final String MOCK_USER_ROLE = "USER";
+
     @Nested
-    @WithMockUser(authorities = "USER", username = "userTest", password = "user")
+    @WithMockUser(authorities = "USER", username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
     public class Deposit {
 
         @Test
@@ -80,6 +87,134 @@ public class MoneyBalanceControllerTest {
                     .andDo(print())
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.amount").value("1.55"));
+        }
+    }
+
+    @Nested
+    public class Withdraw {
+
+        private static final String WITHDRAW_MAPPING = REQUEST_MAPPING + "/withdraw";
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        void Should_Fail_When_ReturnIsNull() throws Exception {
+
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=15.0"))
+                    .andDo(print())
+                    .andExpect(status().isAccepted())
+                    .andExpect(jsonPath("$").exists());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        void Should_Fail_When_IsNoRequestParam() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        void Should_Fail_When_WithdrawAmountIsZero() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=0"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        void Should_Fail_When_WithdrawAmountIsLessThanZero() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=-1"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_WithdrawAmountIsOne() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=1"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_WithdrawAmountIsNine() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=9"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_WithdrawAmountIsNine_With_OneDigitAfterFloat() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=9.9"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_WithdrawAmountIsNine_With_TwoDigitsAfterFloat() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=9.99"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Success_When_WithdrawAmountIsTen() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=10"))
+                    .andDo(print())
+                    .andExpect(status().isAccepted());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Success_When_WithdrawAmountIsEleven() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=11"))
+                    .andDo(print())
+                    .andExpect(status().isAccepted());
+        }
+
+        @Test
+        @WithMockUser(authorities = "USER", username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Success_When_WithdrawAmountWithOneDigitAfterFloat() throws Exception {
+            double withdrawAmount = 10.5;
+            double expectedMoneyBalance = 100 - 10.5;
+
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=" + withdrawAmount))
+                    .andDo(print())
+                    .andExpect(status().isAccepted())
+                    .andExpect(jsonPath("$.amount").value(expectedMoneyBalance));
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Success_When_WithdrawAmountWithTwoDigitsAfterFloat() throws Exception {
+            double withdrawAmount = 10.5;
+            double expectedMoneyBalance = 100 - 10.5;
+
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=" + withdrawAmount))
+                    .andDo(print())
+                    .andExpect(status().isAccepted())
+                    .andExpect(jsonPath("$.amount").value(expectedMoneyBalance));
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_BalanceIsNotEnough_And_WithdrawAmountIsOk() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=10"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
+        void Should_Fail_When_BalanceIsNotEnough_And_WithdrawAmountIsBad() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=9"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
         }
     }
 
