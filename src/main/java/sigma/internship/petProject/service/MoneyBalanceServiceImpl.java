@@ -30,13 +30,45 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
     public MoneyBalanceDto deposit(double amount) {
         User user = getUser();
 
-        MoneyBalance moneyBalance = getMoneyBalanceByUserId(user.getId());
         if (amount < 1) {
             log.info("Deposit is {} USD that is less than 0 from user: {}", amount, user.getUsername());
             throw new WebException(HttpStatus.PAYMENT_REQUIRED, "Issue with updating money balance");
         }
+        MoneyBalance moneyBalance = getMoneyBalanceByUserId(user.getId());
 
         moneyBalance.setAmount(moneyBalance.getAmount().add(BigDecimal.valueOf(amount)));
+
+        MoneyBalance updatedMoneyBalance = moneyBalanceRepository.save(moneyBalance);
+
+        if (!moneyBalance.getAmount().equals(updatedMoneyBalance.getAmount())) {
+            log.error("Issue with updating money balance for user: \"{}\"", user.getUsername());
+            throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with updating money balance");
+        }
+
+        return moneyBalanceMapper.moneyBalanceToMoneyBalanceDto(updatedMoneyBalance);
+    }
+
+    @Override
+    public MoneyBalanceDto withdraw(double amount) {
+        log.info("Starting validating withdrawal amount");
+        if (amount < 10.00) {
+            log.error("Withdraw request is less than 10 USD: {}", amount);
+            throw new WebException(HttpStatus.BAD_REQUEST, "Withdraw request must be more than 10 USD");
+        }
+        log.info("Withdraw amount is valid");
+
+        User user = getUser();
+        MoneyBalance moneyBalance = getMoneyBalanceByUserId(user.getId());
+        BigDecimal amountBigDecimal = BigDecimal.valueOf(amount);
+
+        log.info("Starting validating user's money balance");
+        if (moneyBalance.getAmount().compareTo(amountBigDecimal) < 0) {
+            log.error("User money is less than 11: {}", user.getUsername());
+            throw new WebException(HttpStatus.BAD_REQUEST, "User balance cannot process the withdrawal");
+        }
+        log.info("User's money balance is valid");
+
+        moneyBalance.setAmount(moneyBalance.getAmount().subtract(amountBigDecimal));
 
         MoneyBalance updatedMoneyBalance = moneyBalanceRepository.save(moneyBalance);
 
@@ -62,7 +94,7 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
     }
 
     private MoneyBalance getMoneyBalanceByUserId(long id) {
-        log.info("Starting retrieving user's money balance: {}", id);
+        log.info("Starting retrieving user's money balance");
         Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(id);
         if (moneyBalanceOptional.isEmpty()) {
             log.error("Money balance is not found");

@@ -33,4 +33,15 @@ public class MoneyBalanceController {
     public MoneyBalanceDto deposit(@RequestParam(value = "amount") double amount) {
         return moneyBalanceService.deposit(amount);
     }
+
+    @Operation(summary = "Withdraw money to authorized user")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Successful withdraw")
+    })
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @PostMapping("/withdraw")
+    public MoneyBalanceDto withdraw(@RequestParam(value = "amount") double amount) {
+        return moneyBalanceService.withdraw(amount);
+    }
 }
