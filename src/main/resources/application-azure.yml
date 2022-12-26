@@ -1,0 +1,12 @@
+server:
+  port: ${PORT}
+spring:
+  liquibase:
+    enabled: true
+    change-log: classpath:liquibase/changelog-master.xml
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
+    hikari:
+      register-mbeans: true
