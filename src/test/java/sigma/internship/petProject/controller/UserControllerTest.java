@@ -45,8 +45,8 @@ public class UserControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
-
+                    .andExpect(status().isBadRequest())
+            ;
         }
 
         @Test
@@ -58,8 +58,8 @@ public class UserControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
-
+                    .andExpect(status().isBadRequest())
+            ;
         }
 
         @Test
@@ -71,8 +71,8 @@ public class UserControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
-
+                    .andExpect(status().isBadRequest())
+            ;
         }
 
         @Test
@@ -84,8 +84,8 @@ public class UserControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
-
+                    .andExpect(status().isBadRequest())
+            ;
         }
 
         @Test
@@ -100,8 +100,21 @@ public class UserControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.username").value(user.username()))
                     .andExpect(jsonPath("$.email").value(user.email()))
-                    .andExpect(jsonPath("$.id", notNullValue()));
+                    .andExpect(jsonPath("$.id", notNullValue()))
+            ;
+        }
 
+        @Test
+        void Should_Fail_When_AuthUserDtoExists() throws Exception {
+            AuthUserDto user = new AuthUserDto(0, "userTest", "joe@email.com", "joe");
+
+            mockMvc.perform(post(REQUEST_MAPPING)
+                            .content(objectMapper.writeValueAsString(user))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andDo(print())
+                    .andExpect(status().isConflict())
+            ;
         }
     }
 

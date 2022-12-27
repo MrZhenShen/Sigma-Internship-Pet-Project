@@ -34,7 +34,7 @@ public class ResultController {
     })
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping
-    public Page<ResultDto> getAllUsers(@ParameterObject Pageable pageable) {
+    public Page<ResultDto> getAllResults(@ParameterObject Pageable pageable) {
         return resultService.findAll(pageable);
     }
 }
