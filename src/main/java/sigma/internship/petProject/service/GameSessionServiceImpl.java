@@ -9,9 +9,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sigma.internship.petProject.dto.GameSessionDto;
+import sigma.internship.petProject.dto.ResultDto;
 import sigma.internship.petProject.entity.*;
 import sigma.internship.petProject.exception.WebException;
 import sigma.internship.petProject.mapper.GameSessionMapper;
+import sigma.internship.petProject.mapper.ResultMapper;
 import sigma.internship.petProject.repository.GameRepository;
 import sigma.internship.petProject.repository.GameSessionRepository;
 import sigma.internship.petProject.repository.MoneyBalanceRepository;
@@ -32,14 +34,16 @@ public class GameSessionServiceImpl implements GameSessionService {
 
     private final GameSessionRepository gameSessionRepository;
     private final GameRepository gameRepository;
-    private final GameSessionMapper gameSessionMapper;
     private final UserRepository userRepository;
     private final MoneyBalanceRepository moneyBalanceRepository;
     private final ResultRepository resultRepository;
     private final RoundRepository roundRepository;
 
+    private final GameSessionMapper gameSessionMapper;
+    private final ResultMapper resultMapper;
+
     @Override
-    public GameSessionDto createGameSession(long gameId, int roundAmount) {
+    public List<ResultDto> createGameSession(long gameId, int roundAmount) {
         log.info("Starting creating a new game session");
 
         Game game = getGame(gameId);
@@ -47,14 +51,28 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         validateMoneyBalance(game.getCost(), roundAmount, user);
 
-        return gameSessionMapper.gameSessionToGameSessionDto(
-                gameSessionRepository.save(
-                        GameSession
-                                .builder()
-                                .game(game)
-                                .player(user)
-                                .rounds(getRounds(game, roundAmount))
-                                .build()));
+        GameSession gameSession = gameSessionRepository.save(GameSession
+                .builder()
+                .game(game)
+                .player(user)
+                .build());
+
+        Collection<Round> roundCollection = getRounds(game, roundAmount);
+        roundCollection.forEach(round -> round.setGameSession(gameSession));
+
+        roundRepository.saveAll(roundCollection);
+        List<Result> results = roundCollection.stream().map(Round::getResult).toList();
+
+        Optional<BigDecimal> moneyResultOptional = results.stream().map(Result::getAmount).reduce(BigDecimal::add);
+        Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(user.getId());
+
+        if (moneyBalanceOptional.isPresent() & moneyResultOptional.isPresent()) {
+            MoneyBalance moneyBalance = moneyBalanceOptional.get();
+            moneyBalance.setAmount(moneyBalance.getAmount().add(moneyResultOptional.get()));
+            moneyBalanceRepository.save(moneyBalance);
+        }
+
+        return roundCollection.stream().map(Round::getResult).map(resultMapper::resultToResultDto).collect(Collectors.toList());
     }
 
     private void validateMoneyBalance(BigDecimal gameCost, int roundAmount, User user) {
@@ -70,20 +88,16 @@ public class GameSessionServiceImpl implements GameSessionService {
         }
     }
 
-    private Set<Round> getRounds(Game game, int roundAmount) {
-        Set<Round> rounds = new HashSet<>();
-
+    private Collection<Round> getRounds(Game game, int roundAmount) {
         if (game.isOneUserAction()) {
             if (roundAmount < 1) {
                 log.error("Bad amount of rounds: {}", roundAmount);
                 throw new WebException(HttpStatus.BAD_REQUEST, "Bad amount of rounds");
             }
-            rounds.addAll(generateRounds(game.getWinning(), roundAmount, game.getCost()));
+            return generateRounds(game.getWinning(), roundAmount, game.getCost());
         } else {
-            rounds.addAll(generateRounds(game.getWinning(), 1, game.getCost()));
+            return generateRounds(game.getWinning(), 1, game.getCost());
         }
-
-        return rounds;
     }
 
     private User getUser() {
@@ -117,7 +131,7 @@ public class GameSessionServiceImpl implements GameSessionService {
                                     ? bet.multiply(BigDecimal.valueOf(1.5))
                                     : BigDecimal.valueOf(0));
 
-                    return roundRepository.save(Round
+                    return Round
                             .builder()
                             .playerBet(bet)
                             .result(resultRepository.save(Result
@@ -127,7 +141,7 @@ public class GameSessionServiceImpl implements GameSessionService {
                                             ? ResultType.LOSE
                                             : ResultType.WIN)
                                     .build()))
-                            .build());
+                            .build();
                 })
                 .limit(roundAmount)
                 .collect(Collectors.toSet());

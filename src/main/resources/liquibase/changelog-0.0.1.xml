@@ -183,15 +183,16 @@
         <dropForeignKeyConstraint baseTableName="round" constraintName="FK_ROUND_ON_ROUND"/>
         <dropUniqueConstraint tableName="round" constraintName="uc_round_round"/>
         <dropColumn tableName="round" columnName="round_id"/>
+    </changeSet>
 
-        <addColumn tableName="game_session">
-            <column name="round_id" type="BIGINT">
-                <constraints nullable="false" unique="true"/>
-            </column>
+    <changeSet id="7-add-game_session_id-to-round-table" author="yevhen-rozhylo">
+        <addColumn tableName="round">
+            <column name="game_session_id" type="BIGINT"/>
         </addColumn>
-        <addForeignKeyConstraint baseColumnNames="round_id" baseTableName="game_session"
-                                 constraintName="FK_GAME_SESSION_ON_ROUND" referencedColumnNames="id"
-                                 referencedTableName="round"/>
+        <addForeignKeyConstraint baseTableName="round" baseColumnNames="game_session_id"
+                                 referencedTableName="game_session" referencedColumnNames="id"
+                                 constraintName="FK_GAMESESSION_ON_ROUND"/>
+
     </changeSet>
 
 </databaseChangeLog>

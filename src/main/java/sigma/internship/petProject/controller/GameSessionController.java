@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sigma.internship.petProject.dto.GameSessionDto;
+import sigma.internship.petProject.dto.ResultDto;
 import sigma.internship.petProject.service.GameSessionService;
+
+import java.util.List;
 
 @Tag(name = "Game Session Controller")
 @RestController
@@ -38,7 +41,7 @@ public class GameSessionController {
     })
     @PreAuthorize("hasAnyAuthority('USER')")
     @PostMapping
-    public GameSessionDto createGameSession(
+    public List<ResultDto> createGameSession(
             @RequestParam(value = "game") long gameId,
             @RequestParam(value = "rounds", defaultValue = "1") int rounds) {
         return gameSessionService.createGameSession(gameId, rounds);

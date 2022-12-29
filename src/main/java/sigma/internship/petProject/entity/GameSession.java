@@ -40,8 +40,7 @@ public class GameSession {
     @JoinColumn(name = "player_id", nullable = false, referencedColumnName = "id")
     private User player;
 
-    @OneToMany
-    @JoinColumn(name = "round_id", nullable = false, unique = true, referencedColumnName = "id")
+    @OneToMany(mappedBy="gameSession")
     private Set<Round> rounds;
 
     @Column(name = "create_date", nullable = false)
