@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import sigma.internship.petProject.dto.GameSessionDto;
 import sigma.internship.petProject.service.GameSessionService;
 
-import java.math.BigDecimal;
-
 @Tag(name = "Game Session Controller")
 @RestController
 @RequiredArgsConstructor
@@ -42,9 +40,8 @@ public class GameSessionController {
     @PostMapping
     public GameSessionDto createGameSession(
             @RequestParam(value = "game") long gameId,
-            @RequestParam(value = "rounds", defaultValue = "1") int rounds,
-            @RequestParam(value = "bet") BigDecimal bet) {
-        return gameSessionService.createGameSession(gameId, rounds, bet);
+            @RequestParam(value = "rounds", defaultValue = "1") int rounds) {
+        return gameSessionService.createGameSession(gameId, rounds);
     }
 
     @Operation(summary = "Find all game sessions")

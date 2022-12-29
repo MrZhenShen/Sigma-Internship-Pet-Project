@@ -41,7 +41,7 @@ public class GameSession {
     private User player;
 
     @OneToMany
-    @JoinColumn(name = "round_id", nullable = false, unique = true)
+    @JoinColumn(name = "round_id", nullable = false, unique = true, referencedColumnName = "id")
     private Set<Round> rounds;
 
     @Column(name = "create_date", nullable = false)

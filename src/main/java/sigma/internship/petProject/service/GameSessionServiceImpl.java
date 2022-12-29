@@ -15,6 +15,8 @@ import sigma.internship.petProject.mapper.GameSessionMapper;
 import sigma.internship.petProject.repository.GameRepository;
 import sigma.internship.petProject.repository.GameSessionRepository;
 import sigma.internship.petProject.repository.MoneyBalanceRepository;
+import sigma.internship.petProject.repository.ResultRepository;
+import sigma.internship.petProject.repository.RoundRepository;
 import sigma.internship.petProject.repository.UserRepository;
 
 import java.math.BigDecimal;
@@ -33,13 +35,14 @@ public class GameSessionServiceImpl implements GameSessionService {
     private final GameSessionMapper gameSessionMapper;
     private final UserRepository userRepository;
     private final MoneyBalanceRepository moneyBalanceRepository;
+    private final ResultRepository resultRepository;
+    private final RoundRepository roundRepository;
 
     @Override
-    public GameSessionDto createGameSession(long gameId, int roundAmount, BigDecimal bet) {
+    public GameSessionDto createGameSession(long gameId, int roundAmount) {
         log.info("Starting creating a new game session");
 
         Game game = getGame(gameId);
-
         User user = getUser();
 
         validateMoneyBalance(game.getCost(), roundAmount, user);
@@ -50,7 +53,7 @@ public class GameSessionServiceImpl implements GameSessionService {
                                 .builder()
                                 .game(game)
                                 .player(user)
-                                .rounds(getRounds(game, roundAmount, bet))
+                                .rounds(getRounds(game, roundAmount))
                                 .build()));
     }
 
@@ -61,23 +64,25 @@ public class GameSessionServiceImpl implements GameSessionService {
             log.error("Money balance for user with id \"{}\" is not found", user.getId());
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving user's money balance");
         }
-        if (0 < moneyBalanceOptional.get().getAmount().compareTo(gameCost.multiply(BigDecimal.valueOf(roundAmount)))) {
+        if (0 > moneyBalanceOptional.get().getAmount().compareTo(gameCost.multiply(BigDecimal.valueOf(roundAmount)))) {
             log.error("User \"{}\" money balance is not enough to create game session", user.getUsername());
             throw new WebException(HttpStatus.PAYMENT_REQUIRED, "User is lack of money to start game session");
         }
     }
 
-    private Set<Round> getRounds(Game game, int roundAmount, BigDecimal bet) {
+    private Set<Round> getRounds(Game game, int roundAmount) {
         Set<Round> rounds = new HashSet<>();
+
         if (game.isOneUserAction()) {
             if (roundAmount < 1) {
                 log.error("Bad amount of rounds: {}", roundAmount);
                 throw new WebException(HttpStatus.BAD_REQUEST, "Bad amount of rounds");
             }
-            rounds.addAll(generateRounds(game.getWinning(), roundAmount, bet));
+            rounds.addAll(generateRounds(game.getWinning(), roundAmount, game.getCost()));
         } else {
-            rounds.addAll(generateRounds(game.getWinning(), 1, bet));
+            rounds.addAll(generateRounds(game.getWinning(), 1, game.getCost()));
         }
+
         return rounds;
     }
 
@@ -104,25 +109,25 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     private Collection<Round> generateRounds(double winning, int roundAmount, BigDecimal bet) {
-        AtomicReference<BigDecimal> resultMoney = null;
+        AtomicReference<BigDecimal> resultMoney = new AtomicReference<>();
         return Stream
                 .generate(() -> {
-                    assert false;
                     resultMoney.set(
                             Math.random() <= winning
                                     ? bet.multiply(BigDecimal.valueOf(1.5))
                                     : BigDecimal.valueOf(0));
-                    return Round
+
+                    return roundRepository.save(Round
                             .builder()
                             .playerBet(bet)
-                            .result(Result
+                            .result(resultRepository.save(Result
                                     .builder()
                                     .amount(resultMoney.get())
                                     .type(resultMoney.get().equals(BigDecimal.valueOf(0))
                                             ? ResultType.LOSE
                                             : ResultType.WIN)
-                                    .build())
-                            .build();
+                                    .build()))
+                            .build());
                 })
                 .limit(roundAmount)
                 .collect(Collectors.toSet());

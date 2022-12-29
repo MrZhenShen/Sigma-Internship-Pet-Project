@@ -1,7 +1,8 @@
-package sigma.internship.petProject.entity;
+package sigma.internship.petProject.mapper;
 
 import org.mapstruct.*;
 import sigma.internship.petProject.dto.MoneyBalanceDto;
+import sigma.internship.petProject.entity.MoneyBalance;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface MoneyBalanceMapper {

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sigma.internship.petProject.dto.MoneyBalanceDto;
 import sigma.internship.petProject.entity.MoneyBalance;
-import sigma.internship.petProject.entity.MoneyBalanceMapper;
+import sigma.internship.petProject.mapper.MoneyBalanceMapper;
 import sigma.internship.petProject.entity.User;
 import sigma.internship.petProject.exception.WebException;
 import sigma.internship.petProject.repository.MoneyBalanceRepository;
