@@ -152,10 +152,6 @@
         </update>
     </changeSet>
 
-    <changeSet author="yevhen-rozhylo" id="4-delete-twit">
-        <dropTable tableName="twit"/>
-    </changeSet>
-
     <changeSet author="yevhen-rozhylo" id="5-insert-default-games">
         <insert tableName="game">
             <column name="title" value="Spin"/>

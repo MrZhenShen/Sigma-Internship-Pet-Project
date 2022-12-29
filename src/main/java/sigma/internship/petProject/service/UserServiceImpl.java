@@ -2,6 +2,8 @@ package sigma.internship.petProject.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,6 @@ import sigma.internship.petProject.repository.MoneyBalanceRepository;
 import sigma.internship.petProject.repository.UserRepository;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -73,9 +73,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public Page<UserDto> getAllUsers(Pageable pageable) {
         log.info("Staring retrieving all user data");
-        return userRepository.findAll().stream().map(userMapper::toDto).collect(Collectors.toList());
+        return userRepository.findAll(pageable).map(userMapper::toDto);
     }
 
     private void encodePassword(User userEntity, AuthUserDto user) {

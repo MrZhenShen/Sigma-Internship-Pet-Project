@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,4 +59,14 @@ public class UserController {
         return userService.getUserByUsername(authenticatedUser.getUsername());
     }
 
+    @Operation(summary = "Find all users")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page of users")
+    })
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/all")
+    public Page<UserDto> getAllUsers(@ParameterObject Pageable pageable) {
+        return userService.getAllUsers(pageable);
+    }
 }

@@ -24,26 +24,41 @@ class GameControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private static final String REQUEST_MAPPING = "/game";
+
     @Nested
     public class FindAll {
         @Test
         @WithAnonymousUser
-        void successful() throws Exception {
-            mockMvc.perform(get("/game"))
+        void Should_ReturnListOfGames_WhenRequestForAllGames() throws Exception {
+            mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size()").value(2))
                     .andExpect(jsonPath("$[0].id").value(1))
             ;
         }
+
+        @Test
+        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @WithAnonymousUser
+        void Should_Fail_When_DatabaseIsEmpty() throws Exception {
+            mockMvc.perform(get(REQUEST_MAPPING))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+            ;
+        }
     }
 
     @Nested
     public class FindAllDetailed {
+
+        private static final String DETAILED_REQUEST_SUBMAPPING = REQUEST_MAPPING + "/detailed";
+
         @Test
         @WithMockUser(authorities = "ADMIN")
         void successful() throws Exception {
-            mockMvc.perform(get("/game/detailed"))
+            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size()").value(2))
@@ -54,7 +69,7 @@ class GameControllerTest {
         @Test
         @WithMockUser(authorities = "USER")
         void failForUser() throws Exception {
-            mockMvc.perform(get("/game/detailed"))
+            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
             ;
@@ -63,9 +78,19 @@ class GameControllerTest {
         @Test
         @WithAnonymousUser
         void failForAnonymousUser() throws Exception {
-            mockMvc.perform(get("/game/detailed"))
+            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
+            ;
+        }
+
+        @Test
+        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @WithMockUser(authorities = "ADMIN")
+        void Should_Fail_When_DatabaseIsEmpty() throws Exception {
+            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
             ;
         }
     }
@@ -76,7 +101,7 @@ class GameControllerTest {
         @WithAnonymousUser
         void successful() throws Exception {
             int expectedId = 1;
-            mockMvc.perform(get("/game/"+ expectedId))
+            mockMvc.perform(get(REQUEST_MAPPING + "/" + expectedId))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(expectedId))
@@ -86,7 +111,7 @@ class GameControllerTest {
         @Test
         @WithAnonymousUser
         void failNotFound() throws Exception {
-            mockMvc.perform(get("/game/10"))
+            mockMvc.perform(get(REQUEST_MAPPING + "/10"))
                     .andDo(print())
                     .andExpect(status().isNotFound())
             ;
