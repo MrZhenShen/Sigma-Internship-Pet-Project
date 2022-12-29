@@ -183,5 +183,19 @@
         </insert>
     </changeSet>
 
+    <changeSet id="6-delete-round_id-from-round-table" author="yevhen-rozhylo">
+        <dropForeignKeyConstraint baseTableName="round" constraintName="FK_ROUND_ON_ROUND"/>
+        <dropUniqueConstraint tableName="round" constraintName="uc_round_round"/>
+        <dropColumn tableName="round" columnName="round_id"/>
+
+        <addColumn tableName="game_session">
+            <column name="round_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="round_id" baseTableName="game_session"
+                                 constraintName="FK_GAME_SESSION_ON_ROUND" referencedColumnNames="id"
+                                 referencedTableName="round"/>
+    </changeSet>
 
 </databaseChangeLog>
