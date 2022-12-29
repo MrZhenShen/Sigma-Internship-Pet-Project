@@ -152,9 +152,4 @@
         </update>
     </changeSet>
 
-    <changeSet author="yevhen-rozhylo" id="4-delete-twit">
-        <dropTable tableName="twit"/>
-    </changeSet>
-
-
 </databaseChangeLog>
