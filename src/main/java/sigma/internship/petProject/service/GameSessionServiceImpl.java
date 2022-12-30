@@ -68,7 +68,9 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         if (moneyBalanceOptional.isPresent() & moneyResultOptional.isPresent()) {
             MoneyBalance moneyBalance = moneyBalanceOptional.get();
-            moneyBalance.setAmount(moneyBalance.getAmount().add(moneyResultOptional.get()));
+            moneyBalance.setAmount(moneyBalance.getAmount()
+                    .add(moneyResultOptional.get())
+                    .subtract(game.getCost().multiply(BigDecimal.valueOf(roundAmount))));
             moneyBalanceRepository.save(moneyBalance);
         }
 
