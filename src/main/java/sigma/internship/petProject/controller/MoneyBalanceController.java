@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sigma.internship.petProject.dto.MoneyBalanceDto;
 import sigma.internship.petProject.service.MoneyBalanceService;
 
-@Tag(name = "Money Balance controller")
+@Tag(name = "Money Balance Controller")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/money-balance")

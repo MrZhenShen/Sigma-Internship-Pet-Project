@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sigma.internship.petProject.dto.ResultDto;
 import sigma.internship.petProject.service.ResultService;
 
-@Tag(name = "Result controller")
+@Tag(name = "Result Controller")
 @RestController
 @RequiredArgsConstructor
 @Slf4j

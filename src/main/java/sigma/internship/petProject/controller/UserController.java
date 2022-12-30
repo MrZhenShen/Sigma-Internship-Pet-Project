@@ -25,7 +25,7 @@ import sigma.internship.petProject.service.UserService;
 
 import javax.validation.Valid;
 
-@Tag(name = "User controller")
+@Tag(name = "User Controller")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
