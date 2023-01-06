@@ -2,17 +2,13 @@ package sigma.internship.petProject.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import sigma.internship.petProject.dto.GameSessionDto;
 import sigma.internship.petProject.dto.ResultDto;
 import sigma.internship.petProject.entity.*;
 import sigma.internship.petProject.exception.WebException;
-import sigma.internship.petProject.mapper.GameSessionMapper;
 import sigma.internship.petProject.mapper.ResultMapper;
 import sigma.internship.petProject.repository.GameRepository;
 import sigma.internship.petProject.repository.GameSessionRepository;
@@ -39,7 +35,6 @@ public class GameSessionServiceImpl implements GameSessionService {
     private final ResultRepository resultRepository;
     private final RoundRepository roundRepository;
 
-    private final GameSessionMapper gameSessionMapper;
     private final ResultMapper resultMapper;
 
     @Override
@@ -147,10 +142,5 @@ public class GameSessionServiceImpl implements GameSessionService {
                 })
                 .limit(roundAmount)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Page<GameSessionDto> findAll(Pageable pageable) {
-        return gameSessionRepository.findAll(pageable).map(gameSessionMapper::gameSessionToGameSessionDto);
     }
 }
