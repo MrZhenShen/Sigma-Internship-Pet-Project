@@ -40,7 +40,7 @@ class GameControllerTest {
         }
 
         @Test
-        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithAnonymousUser
         void Should_Fail_When_DatabaseIsEmpty() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
@@ -85,7 +85,7 @@ class GameControllerTest {
         }
 
         @Test
-        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithMockUser(authorities = "ADMIN")
         void Should_Fail_When_DatabaseIsEmpty() throws Exception {
             mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
