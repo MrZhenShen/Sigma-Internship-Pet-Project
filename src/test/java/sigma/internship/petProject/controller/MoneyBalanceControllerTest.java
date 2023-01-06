@@ -88,6 +88,24 @@ public class MoneyBalanceControllerTest {
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.amount").value("1.55"));
         }
+
+        @Test
+        @Sql(scripts = "/scripts/delete/clear-user.sql")
+        void Should_ThrowInternalServerError_When_UserWasDeleted() throws Exception {
+            mockMvc.perform(post("/money-balance/deposit?amount=1.55"))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+            ;
+        }
+
+        @Test
+        @Sql(scripts = "/scripts/delete/clear-money-balance.sql")
+        void Should_ThrowInternalServerError_When_MoneyBalanceWasDeleted() throws Exception {
+            mockMvc.perform(post("/money-balance/deposit?amount=1.55"))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+            ;
+        }
     }
 
     @Nested
