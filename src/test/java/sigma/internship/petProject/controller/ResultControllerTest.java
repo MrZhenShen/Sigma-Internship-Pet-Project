@@ -40,7 +40,7 @@ public class ResultControllerTest {
 
         @Test
         @WithMockUser(authorities = "USER")
-        void Should_Fail_When_isUser() throws Exception {
+        void Should_ThrowForbidden_When_isUser() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
@@ -49,7 +49,7 @@ public class ResultControllerTest {
 
         @Test
         @WithAnonymousUser
-        void Should_Fail_When_isAnonymousUser() throws Exception {
+        void Should_ThrowUnauthorized_When_isAnonymousUser() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
