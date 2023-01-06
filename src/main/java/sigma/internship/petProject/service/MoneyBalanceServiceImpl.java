@@ -40,11 +40,6 @@ public class MoneyBalanceServiceImpl implements MoneyBalanceService {
 
         MoneyBalance updatedMoneyBalance = moneyBalanceRepository.save(moneyBalance);
 
-        if (!moneyBalance.getAmount().equals(updatedMoneyBalance.getAmount())) {
-            log.error("Issue with updating money balance for user: \"{}\"", user.getUsername());
-            throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with updating money balance");
-        }
-
         return moneyBalanceMapper.moneyBalanceToMoneyBalanceDto(updatedMoneyBalance);
     }
 
