@@ -115,6 +115,16 @@ public class MoneyBalanceControllerTest {
 
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        @Sql(scripts = "/scripts/delete/clear-money-balance.sql")
+        void Should_ThrowInternalServerError_When_MoneyBalanceWasDeleted() throws Exception {
+            mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=10"))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+            ;
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_ReturnUpdateMoneyBalance_When_WithdrawIsValid() throws Exception {
 
             mockMvc.perform(post(WITHDRAW_MAPPING + "?amount=15.0"))
@@ -238,6 +248,16 @@ public class MoneyBalanceControllerTest {
 
     @Nested
     public class View {
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
+        @Sql(scripts = "/scripts/delete/clear-money-balance.sql")
+        void Should_ThrowInternalServerError_When_MoneyBalanceWasDeleted() throws Exception {
+            mockMvc.perform(get("/money-balance"))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+            ;
+        }
 
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
