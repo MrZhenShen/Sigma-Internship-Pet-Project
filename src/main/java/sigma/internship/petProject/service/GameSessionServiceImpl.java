@@ -43,46 +43,59 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         Game game = getGame(gameId);
         User user = getUser();
+        MoneyBalance moneyBalance = findMoneyBalance(game.getCost(), roundAmount, user);
 
-        validateMoneyBalance(game.getCost(), roundAmount, user);
+        List<Round> roundCollection = getRounds(game, roundAmount)
+                .stream()
+                .peek(round -> round.setGameSession(gameSessionRepository.save(GameSession
+                        .builder()
+                        .game(game)
+                        .player(user)
+                        .build()))
+                )
+                .toList();
 
-        GameSession gameSession = gameSessionRepository.save(GameSession
-                .builder()
-                .game(game)
-                .player(user)
-                .build());
+        roundCollection = roundRepository.saveAll(roundCollection);
 
-        Collection<Round> roundCollection = getRounds(game, roundAmount);
-        roundCollection.forEach(round -> round.setGameSession(gameSession));
+        moneyBalance.setAmount(moneyBalance
+                .getAmount()
+                .add(countMoneyResult(roundCollection))
+                .subtract(game.getCost().multiply(BigDecimal.valueOf(roundAmount))));
 
-        roundRepository.saveAll(roundCollection);
-        List<Result> results = roundCollection.stream().map(Round::getResult).toList();
+        moneyBalanceRepository.save(moneyBalance);
 
-        Optional<BigDecimal> moneyResultOptional = results.stream().map(Result::getAmount).reduce(BigDecimal::add);
-        Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(user.getId());
-
-        if (moneyBalanceOptional.isPresent() & moneyResultOptional.isPresent()) {
-            MoneyBalance moneyBalance = moneyBalanceOptional.get();
-            moneyBalance.setAmount(moneyBalance.getAmount()
-                    .add(moneyResultOptional.get())
-                    .subtract(game.getCost().multiply(BigDecimal.valueOf(roundAmount))));
-            moneyBalanceRepository.save(moneyBalance);
-        }
-
-        return roundCollection.stream().map(Round::getResult).map(resultMapper::resultToResultDto).collect(Collectors.toList());
+        return roundCollection.stream().map(Round::getResult).map(resultMapper::resultToResultDto).toList();
     }
 
-    private void validateMoneyBalance(BigDecimal gameCost, int roundAmount, User user) {
+    private BigDecimal countMoneyResult(List<Round> roundCollection) {
+        if (roundCollection.size() > 1) {
+            return roundCollection
+                    .stream()
+                    .map(Round::getResult)
+                    .map(Result::getAmount)
+                    .reduce(BigDecimal::add).get();
+        } else {
+            return roundCollection.get(0).getResult().getAmount();
+        }
+    }
+
+    private MoneyBalance findMoneyBalance(BigDecimal gameCost, int roundAmount, User user) {
         log.info("Starting validating user's money balance");
         Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(user.getId());
+
         if (moneyBalanceOptional.isEmpty()) {
             log.error("Money balance for user with id \"{}\" is not found", user.getId());
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving user's money balance");
         }
-        if (0 > moneyBalanceOptional.get().getAmount().compareTo(gameCost.multiply(BigDecimal.valueOf(roundAmount)))) {
+
+        MoneyBalance moneyBalance = moneyBalanceOptional.get();
+
+        if (0 > moneyBalance.getAmount().compareTo(gameCost.multiply(BigDecimal.valueOf(roundAmount)))) {
             log.error("User \"{}\" money balance is not enough to create game session", user.getUsername());
             throw new WebException(HttpStatus.PAYMENT_REQUIRED, "User is lack of money to start game session");
         }
+
+        return moneyBalance;
     }
 
     private Collection<Round> getRounds(Game game, int roundAmount) {
@@ -103,19 +116,23 @@ public class GameSessionServiceImpl implements GameSessionService {
                 .getAuthentication()
                 .getPrincipal();
         Optional<User> userOptional = userRepository.findByUsername(authenticatedUser.getUsername());
+
         if (userOptional.isEmpty()) {
             log.error("User with username \"{}\" is not found", authenticatedUser.getUsername());
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving user");
         }
+
         return userOptional.get();
     }
 
     private Game getGame(long gameId) {
         Optional<Game> gameOptional = gameRepository.findById(gameId);
+
         if (gameOptional.isEmpty()) {
             log.error("Game with id \"{}\" is not found", gameId);
             throw new WebException(HttpStatus.BAD_REQUEST, "Game does not exist");
         }
+
         return gameOptional.get();
     }
 
