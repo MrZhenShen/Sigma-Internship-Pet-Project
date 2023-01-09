@@ -99,9 +99,9 @@ public class MoneyBalanceControllerTest {
         }
 
         @Test
-        @Sql(scripts = "/scripts/delete/clear-money-balance.sql")
-        void Should_ThrowInternalServerError_When_MoneyBalanceWasDeleted() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=1.55"))
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = "userTest")
+        void Should_ThrowInternalServerError_When_MoneyBalanceIsAbsent() throws Exception {
+            mockMvc.perform(post("/money-balance/deposit?amount=10"))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
