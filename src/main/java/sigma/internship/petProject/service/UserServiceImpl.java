@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     public void checkIfUserExist(String username) {
         log.info("Starting checking if user with \"{}\" username exists", username);
 
-        if (userRepository.findByUsername(username).isEmpty()) {
+        if (userRepository.findByUsername(username).isPresent()) {
             log.error("{} user already exists", username);
             throw new WebException(HttpStatus.CONFLICT, "User already exists");
         }
