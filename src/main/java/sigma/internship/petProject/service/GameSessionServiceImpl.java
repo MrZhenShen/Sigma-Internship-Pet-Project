@@ -7,7 +7,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sigma.internship.petProject.dto.ResultDto;
-import sigma.internship.petProject.entity.*;
+import sigma.internship.petProject.entity.Game;
+import sigma.internship.petProject.entity.GameSession;
+import sigma.internship.petProject.entity.MoneyBalance;
+import sigma.internship.petProject.entity.Result;
+import sigma.internship.petProject.entity.ResultType;
+import sigma.internship.petProject.entity.Round;
+import sigma.internship.petProject.entity.User;
 import sigma.internship.petProject.exception.WebException;
 import sigma.internship.petProject.mapper.ResultMapper;
 import sigma.internship.petProject.repository.GameRepository;
@@ -18,8 +24,9 @@ import sigma.internship.petProject.repository.RoundRepository;
 import sigma.internship.petProject.repository.UserRepository;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +50,9 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         Game game = getGame(gameId);
         User user = getUser();
-        MoneyBalance moneyBalance = findMoneyBalance(game.getCost(), roundAmount, user);
+        MoneyBalance moneyBalance = findMoneyBalance(user);
+
+        validateMoneyBalance(moneyBalance, game.getCost(), roundAmount);
 
         List<Round> roundCollection = getRounds(game, roundAmount)
                 .stream()
@@ -73,14 +82,15 @@ public class GameSessionServiceImpl implements GameSessionService {
                     .stream()
                     .map(Round::getResult)
                     .map(Result::getAmount)
-                    .reduce(BigDecimal::add).get();
+                    .reduce(BigDecimal::add)
+                    .get();
         } else {
             return roundCollection.get(0).getResult().getAmount();
         }
     }
 
-    private MoneyBalance findMoneyBalance(BigDecimal gameCost, int roundAmount, User user) {
-        log.info("Starting validating user's money balance");
+    private MoneyBalance findMoneyBalance(User user) {
+        log.info("Starting retrieving user's money balance");
         Optional<MoneyBalance> moneyBalanceOptional = moneyBalanceRepository.findByPlayerId(user.getId());
 
         if (moneyBalanceOptional.isEmpty()) {
@@ -88,14 +98,25 @@ public class GameSessionServiceImpl implements GameSessionService {
             throw new WebException(HttpStatus.INTERNAL_SERVER_ERROR, "Issue with retrieving user's money balance");
         }
 
-        MoneyBalance moneyBalance = moneyBalanceOptional.get();
+        log.info("Money balance is found");
+        return moneyBalanceOptional.get();
+    }
 
-        if (0 > moneyBalance.getAmount().compareTo(gameCost.multiply(BigDecimal.valueOf(roundAmount)))) {
-            log.error("User \"{}\" money balance is not enough to create game session", user.getUsername());
+    private void validateMoneyBalance(MoneyBalance moneyBalance, BigDecimal gameCost, int roundAmount) {
+        log.info("Starting validating money balance amount");
+        BigDecimal costForGameSession = gameCost.multiply(BigDecimal.valueOf(roundAmount));
+
+        if (compareMoneyBalanceAmountWithCostForGameSession(moneyBalance, costForGameSession)) {
+            log.error("User \"{}\" money balance is not enough to create game session", moneyBalance.getPlayer().getUsername());
             throw new WebException(HttpStatus.PAYMENT_REQUIRED, "User is lack of money to start game session");
         }
 
-        return moneyBalance;
+        log.info("Money balance amount is valid");
+    }
+
+
+    private boolean compareMoneyBalanceAmountWithCostForGameSession(MoneyBalance moneyBalance, BigDecimal costForGameSession) {
+        return 0 > moneyBalance.getAmount().compareTo(costForGameSession);
     }
 
     private Collection<Round> getRounds(Game game, int roundAmount) {
@@ -137,21 +158,22 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     private Collection<Round> generateRounds(double winning, int roundAmount, BigDecimal bet) {
-        AtomicReference<BigDecimal> resultMoney = new AtomicReference<>();
         return Stream
                 .generate(() -> {
-                    resultMoney.set(
-                            Math.random() <= winning
-                                    ? bet.multiply(BigDecimal.valueOf(1.5))
-                                    : BigDecimal.valueOf(0));
+                    final BigDecimal resultMoney;
+                    if (Math.random() <= winning) {
+                        resultMoney = bet.multiply(BigDecimal.valueOf(1.5));
+                    } else {
+                        resultMoney = BigDecimal.ZERO;
+                    }
 
                     return Round
                             .builder()
                             .playerBet(bet)
                             .result(resultRepository.save(Result
                                     .builder()
-                                    .amount(resultMoney.get())
-                                    .type(resultMoney.get().equals(BigDecimal.valueOf(0))
+                                    .amount(resultMoney)
+                                    .type(resultMoney.equals(BigDecimal.valueOf(0))
                                             ? ResultType.LOSE
                                             : ResultType.WIN)
                                     .build()))
