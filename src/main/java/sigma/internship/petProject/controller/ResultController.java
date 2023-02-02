@@ -22,7 +22,7 @@ import sigma.internship.petProject.service.ResultService;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/result")
+@RequestMapping("/api/result")
 public class ResultController {
 
     private final ResultService resultService;

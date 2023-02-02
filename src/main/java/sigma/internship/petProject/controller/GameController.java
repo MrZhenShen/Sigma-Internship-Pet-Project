@@ -19,7 +19,7 @@ import java.util.List;
 @Tag(name = "Game Controller")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/game")
+@RequestMapping("/api/game")
 public class GameController {
 
     private final GameService gameService;

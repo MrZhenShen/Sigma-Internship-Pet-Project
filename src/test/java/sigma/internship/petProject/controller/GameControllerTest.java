@@ -22,16 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class GameControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
-    private static final String REQUEST_MAPPING = "/game";
+    private static final String GLOBAL_MAPPING = "/api/game";
 
     @Nested
-    public class FindAll {
+    class FindAll {
         @Test
         @WithAnonymousUser
         void Should_ReturnListOfGames_WhenRequestForAllGames() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size()").value(3))
@@ -43,7 +43,7 @@ class GameControllerTest {
         @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithAnonymousUser
         void Should_ThrowInternalServerError_When_DatabaseIsEmpty() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -51,14 +51,14 @@ class GameControllerTest {
     }
 
     @Nested
-    public class FindAllDetailed {
+    class FindAllDetailed {
 
-        private static final String DETAILED_REQUEST_SUBMAPPING = REQUEST_MAPPING + "/detailed";
+        private static final String FIND_ALL_DETAILED_MAPPING = GLOBAL_MAPPING + "/detailed";
 
         @Test
         @WithMockUser(authorities = "ADMIN")
         void Should_ReturnOrderedListWithThreeGames_When_ThereAreThreeGames() throws Exception {
-            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
+            mockMvc.perform(get(FIND_ALL_DETAILED_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size()").value(3))
@@ -69,7 +69,7 @@ class GameControllerTest {
         @Test
         @WithMockUser(authorities = "USER")
         void Should_ThrowForbidden_When_IsUser() throws Exception {
-            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
+            mockMvc.perform(get(FIND_ALL_DETAILED_MAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
             ;
@@ -78,7 +78,7 @@ class GameControllerTest {
         @Test
         @WithAnonymousUser
         void Should_ThrowUnauthorized_When_IsAnonymousUser() throws Exception {
-            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
+            mockMvc.perform(get(FIND_ALL_DETAILED_MAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
             ;
@@ -88,7 +88,7 @@ class GameControllerTest {
         @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithMockUser(authorities = "ADMIN")
         void Should_ThrowInternalServerError_When_DatabaseIsEmpty() throws Exception {
-            mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
+            mockMvc.perform(get(FIND_ALL_DETAILED_MAPPING))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -96,12 +96,12 @@ class GameControllerTest {
     }
 
     @Nested
-    public class FindById {
+    class FindById {
         @Test
         @WithAnonymousUser
         void Should_ReturnExpectedGame_When_IdIsProvided() throws Exception {
             int expectedId = 1;
-            mockMvc.perform(get(REQUEST_MAPPING + "/" + expectedId))
+            mockMvc.perform(get(GLOBAL_MAPPING + "/" + expectedId))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(expectedId))
@@ -111,7 +111,7 @@ class GameControllerTest {
         @Test
         @WithAnonymousUser
         void Should_ThrowNotFound_When_NoGameFoundWithNotExistingId() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING + "/10"))
+            mockMvc.perform(get(GLOBAL_MAPPING + "/10"))
                     .andDo(print())
                     .andExpect(status().isNotFound())
             ;
