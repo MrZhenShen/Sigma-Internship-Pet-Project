@@ -6,6 +6,7 @@ addAssignees: author
 
 # A list of reviewers to be added to PRs (GitHub user  name)
 reviewers:
+  - MrZhenShen
   - octocat
 
 # A number of reviewers added to the PR
