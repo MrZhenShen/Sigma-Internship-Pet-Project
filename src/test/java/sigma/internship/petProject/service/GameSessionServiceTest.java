@@ -28,7 +28,7 @@ import java.util.List;
                 "/scripts/delete/clear-user.sql",
                 "/scripts/delete/clear-game.sql"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class GameSessionServiceTest {
+class GameSessionServiceTest {
 
     @Autowired
     private GameSessionService gameSessionService;

@@ -20,7 +20,7 @@ import java.util.List;
 @Tag(name = "Game Session Controller")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/game-session")
+@RequestMapping("/api/game-session")
 public class GameSessionController {
     private final GameSessionService gameSessionService;
 

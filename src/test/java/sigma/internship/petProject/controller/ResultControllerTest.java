@@ -19,19 +19,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Sql(scripts = "/scripts/create/create-result.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/scripts/delete/clear-result.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ResultControllerTest {
+class ResultControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
-    private static final String REQUEST_MAPPING = "/result";
+    private static final String GLOBAL_MAPPING = "/api/result";
 
     @Nested
-    public class FindAll {
+    class FindAll {
         @Test
         @WithMockUser(authorities = "ADMIN")
         void Should_ReturnResults_When_isAdmin() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content.size()").value(2))
@@ -41,7 +41,7 @@ public class ResultControllerTest {
         @Test
         @WithMockUser(authorities = "USER")
         void Should_ThrowForbidden_When_isUser() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
             ;
@@ -50,11 +50,10 @@ public class ResultControllerTest {
         @Test
         @WithAnonymousUser
         void Should_ThrowUnauthorized_When_isAnonymousUser() throws Exception {
-            mockMvc.perform(get(REQUEST_MAPPING))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
             ;
         }
     }
-
 }

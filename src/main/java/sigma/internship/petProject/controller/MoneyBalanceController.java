@@ -19,7 +19,7 @@ import sigma.internship.petProject.service.MoneyBalanceService;
 @Tag(name = "Money Balance Controller")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/money-balance")
+@RequestMapping("/api/money-balance")
 public class MoneyBalanceController {
 
     private final MoneyBalanceService moneyBalanceService;

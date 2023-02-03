@@ -195,4 +195,44 @@
 
     </changeSet>
 
+    <changeSet id="8-create-roles" author="yevhen-rozhylo">
+
+        <sql>SET FOREIGN_KEY_CHECKS=0;</sql>
+
+        <createTable tableName="role">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_role"/>
+            </column>
+            <column name="type" type="VARCHAR(40)"/>
+        </createTable>
+
+        <insert tableName="role">
+            <column name="type" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="role">
+            <column name="type" value="ROLE_USER"/>
+        </insert>
+
+        <dropColumn tableName="end_user" columnName="roleType"/>
+
+        <addColumn tableName="end_user">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_role" references="role(id)"/>
+            </column>
+        </addColumn>
+
+        <sql>SET FOREIGN_KEY_CHECKS=1;</sql>
+
+        <update tableName="end_user">
+            <column name="role_id" valueComputed="(SELECT role.id FROM role WHERE role.type='ROLE_ADMIN')"/>
+            <where>username = 'admin'</where>
+        </update>
+
+        <update tableName="end_user">
+            <column name="role_id" valueComputed="(SELECT role.id FROM role WHERE role.type='ROLE_USER')"/>
+            <where>username = 'user'</where>
+        </update>
+
+    </changeSet>
+
 </databaseChangeLog>

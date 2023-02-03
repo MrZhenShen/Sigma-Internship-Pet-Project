@@ -29,25 +29,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "/scripts/delete/clear-user.sql",
                 "/scripts/delete/clear-game.sql"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class GameSessionControllerTest {
+class GameSessionControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
-    private static final String REQUEST_MAPPING = "/game-session";
+    private static final String GLOBAL_MAPPING = "/api/game-session";
 
     private static final String MOCK_USER_WITH_MONEY = "userWithMoney";
     private static final String MOCK_USER_WITHOUT_MONEY = "userWithoutMoney";
-    private static final String MOCK_USER_PASSWORD = "user";
     private static final String MOCK_USER_ROLE = "USER";
 
     @Nested
-    public class CreateGameSession {
+    class CreateGameSession {
 
         @Test
         @WithMockUser(authorities = "ADMIN")
         void Should_ThrowForbidden_When_isAdmin() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isForbidden())
             ;
@@ -56,7 +55,7 @@ public class GameSessionControllerTest {
         @Test
         @WithAnonymousUser
         void Should_ThrowUnauthorized_When_isAnonymousUser() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
             ;
@@ -65,7 +64,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_ThrowBadRequest_When_NoParamIsProvided() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING))
+            mockMvc.perform(post(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
             ;
@@ -74,7 +73,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_ThrowBadRequest_When_NotExistingGameId() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1000"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1000"))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
             ;
@@ -83,7 +82,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_ThrowBadRequest_When_InvalidGameId() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "textId"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "textId"))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
             ;
@@ -94,7 +93,7 @@ public class GameSessionControllerTest {
         @Sql(scripts = "/scripts/delete/clear-game.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
         @WithMockUser(authorities = MOCK_USER_ROLE)
         void Should_ThrowInternalServerError_When_NotExistingUser() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -103,7 +102,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = "userTest")
         void Should_ThrowInternalServerError_When_NotExistingMoneyBalance() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -112,7 +111,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_ThrowPaymentRequired_When_UserIsLackOfMoney() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isPaymentRequired())
             ;
@@ -121,7 +120,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_CreateRound_When_UserHasOneMoreUSDThanExpected() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "3"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "3"))
                     .andDo(print())
                     .andExpect(status().isCreated())
             ;
@@ -130,7 +129,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_CreateRound_When_UserHasMoneyThatEqualsToGameCost() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isCreated())
             ;
@@ -139,7 +138,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_CreateRounds_When_UserHasMoneyThatEqualsToGameCost() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING).param("game", "1"))
+            mockMvc.perform(post(GLOBAL_MAPPING).param("game", "1"))
                     .andDo(print())
                     .andExpect(status().isCreated())
             ;
@@ -148,7 +147,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_CreateRound_When_GameIsManyActions() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING)
+            mockMvc.perform(post(GLOBAL_MAPPING)
                             .param("game", "1")
                             .param("rounds", "2"))
                     .andDo(print())
@@ -160,7 +159,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_CreateRounds_When_GameIsOneAction() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING)
+            mockMvc.perform(post(GLOBAL_MAPPING)
                             .param("game", "2")
                             .param("rounds", "2"))
                     .andDo(print())
@@ -172,7 +171,7 @@ public class GameSessionControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         void Should_ThrowBadRequest_When_RoundAmountParameterIsInvalidWithOneActionGame() throws Exception {
-            mockMvc.perform(post(REQUEST_MAPPING)
+            mockMvc.perform(post(GLOBAL_MAPPING)
                             .param("game", "2")
                             .param("rounds", "0"))
                     .andDo(print())

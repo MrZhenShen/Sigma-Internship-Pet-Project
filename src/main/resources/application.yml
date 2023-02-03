@@ -14,3 +14,10 @@ spring:
 springdoc:
   packages-to-scan: sigma.internship.petProject.controller
   paths-to-match: /**
+
+access-token:
+  private: access-refresh-token-keys/access-token-private.key
+  public: access-refresh-token-keys/access-token-public.key
+refresh-token:
+  private: access-refresh-token-keys/refresh-token-private.key
+  public: access-refresh-token-keys/refresh-token-public.key

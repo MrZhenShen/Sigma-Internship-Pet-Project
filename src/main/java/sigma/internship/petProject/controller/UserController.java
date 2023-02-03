@@ -11,52 +11,36 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import sigma.internship.petProject.dto.AuthUserDto;
 import sigma.internship.petProject.dto.UserDto;
+import sigma.internship.petProject.entity.User;
 import sigma.internship.petProject.service.UserService;
-
-import javax.validation.Valid;
 
 @Tag(name = "User Controller")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
 
-    @Operation(summary = "Register new user")
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "User successfully created"),
-            @ApiResponse(responseCode = "409", description = "User already exists")
-    })
-    @PostMapping
-    public UserDto createUser(@Valid @RequestBody AuthUserDto user) {
-        return userService.register(user);
-    }
-
-    @Operation(summary = "Authentication")
+    @Operation(summary = "Get authenticated user's data")
     @ResponseStatus(HttpStatus.OK)
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User successfully authenticated"),
-            @ApiResponse(responseCode = "401", description = "User is not authenticated")
+            @ApiResponse(responseCode = "200", description = "User's data is found"),
+            @ApiResponse(responseCode = "401", description = "User is  not authorized"),
+            @ApiResponse(responseCode = "401", description = "Access is forbidden"),
+            @ApiResponse(responseCode = "409", description = "User with such credentials already exist"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping("/login")
-    public UserDto getAuthedUser() {
-        UserDetails authenticatedUser = (UserDetails) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        return userService.getUserByUsername(authenticatedUser.getUsername());
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public UserDto user(@AuthenticationPrincipal User user) {
+        return userService.findByUsername(user.getUsername());
     }
 
     @Operation(summary = "Find all users")

@@ -1,10 +1,10 @@
 package sigma.internship.petProject.dto;
 
-import sigma.internship.petProject.entity.Role;
-
 public record UserDto(
         long id,
+        String firstName,
+        String secondName,
         String username,
         String email,
-        Role role) {
+        RoleDto role) {
 }

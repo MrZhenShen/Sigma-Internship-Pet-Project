@@ -20,12 +20,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Sql(scripts = "/scripts/create/create-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/scripts/delete/clear-user.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MoneyBalanceControllerTest {
+class MoneyBalanceControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
-    private static final String REQUEST_MAPPING = "/money-balance";
+    private static final String GLOBAL_MAPPING = "/api/money-balance";
 
     private static final String MOCK_USER_WITH_MONEY = "userWithMoney";
     private static final String MOCK_USER_WITHOUT_MONEY = "userWithoutMoney";
@@ -34,11 +34,13 @@ public class MoneyBalanceControllerTest {
 
     @Nested
     @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY, password = MOCK_USER_PASSWORD)
-    public class Deposit {
+    class Deposit {
+
+        private static final String DEPOSIT_MAPPING = GLOBAL_MAPPING + "/deposit";
 
         @Test
         void Should_ReturnExistingMoneyBalance_When_RespondIsNull() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=10.0"))
                     .andDo(print())
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$").exists());
@@ -46,28 +48,28 @@ public class MoneyBalanceControllerTest {
 
         @Test
         void Should_ThrowBedRequest_When_IsNoRequestParam() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit"))
+            mockMvc.perform(post(DEPOSIT_MAPPING))
                     .andDo(print())
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         void Should_ThrowPaymentRequired_When_DepositAmountIsZero() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=0"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=0"))
                     .andDo(print())
                     .andExpect(status().isPaymentRequired());
         }
 
         @Test
         void Should_ThrowPaymentRequired_When_DepositAmountIsLessThanZero() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=-1"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=-1"))
                     .andDo(print())
                     .andExpect(status().isPaymentRequired());
         }
 
         @Test
         void Should_ReturnMoneyBalanceWithDepositedAmount_When_DepositAmountIsInt() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=1"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=1"))
                     .andDo(print())
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.amount").value("1.0"));
@@ -75,7 +77,7 @@ public class MoneyBalanceControllerTest {
 
         @Test
         void Should_ReturnMoneyBalanceWithDepositedAmount_When_DepositAmountWithOneDigitAfterFloat() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=1.5"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=1.5"))
                     .andDo(print())
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.amount").value("1.5"));
@@ -83,7 +85,7 @@ public class MoneyBalanceControllerTest {
 
         @Test
         void Should_ReturnMoneyBalanceWithDepositedAmount_When_DepositAmountWithTwoDigitsAfterFloat() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=1.55"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=1.55"))
                     .andDo(print())
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.amount").value("1.55"));
@@ -92,7 +94,7 @@ public class MoneyBalanceControllerTest {
         @Test
         @Sql(scripts = "/scripts/delete/clear-user.sql")
         void Should_ThrowInternalServerError_When_UserWasDeleted() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=1.55"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=1.55"))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -101,17 +103,41 @@ public class MoneyBalanceControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = "userTest")
         void Should_ThrowInternalServerError_When_MoneyBalanceIsAbsent() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=10"))
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=10"))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
         }
+
+        @Test
+        @WithAnonymousUser
+        void Should_ThrowUnauthorized_When_UserIsNotAuthorized() throws Exception {
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=10.0"))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @WithMockUser(authorities = "ADMIN")
+        void Should_ThrowForbidden_When_UserIsAdmin() throws Exception {
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=10.0"))
+                    .andDo(print())
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
+        void Should_ReturnAccepted_When_UserHasDefaultUserRole() throws Exception {
+            mockMvc.perform(post(DEPOSIT_MAPPING + "?amount=10.0"))
+                    .andDo(print())
+                    .andExpect(status().isAccepted());
+        }
     }
 
     @Nested
-    public class Withdraw {
+    class Withdraw {
 
-        private static final String WITHDRAW_MAPPING = REQUEST_MAPPING + "/withdraw";
+        private static final String WITHDRAW_MAPPING = GLOBAL_MAPPING + "/withdraw";
 
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
@@ -247,13 +273,13 @@ public class MoneyBalanceControllerTest {
     }
 
     @Nested
-    public class View {
+    class View {
 
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITH_MONEY)
         @Sql(scripts = "/scripts/delete/clear-money-balance.sql")
         void Should_ThrowInternalServerError_When_MoneyBalanceWasDeleted() throws Exception {
-            mockMvc.perform(get("/money-balance"))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
             ;
@@ -262,7 +288,7 @@ public class MoneyBalanceControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_ReturnExistingMoneyBalance_When_RespondIsNull() throws Exception {
-            mockMvc.perform(get("/money-balance"))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").exists());
@@ -271,38 +297,10 @@ public class MoneyBalanceControllerTest {
         @Test
         @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
         void Should_ReturnZeroBalance_When_TryToView() throws Exception {
-            mockMvc.perform(get("/money-balance"))
+            mockMvc.perform(get(GLOBAL_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.amount").value("0.0"));
-        }
-    }
-
-    @Nested
-    public class Authorities {
-
-        @Test
-        @WithAnonymousUser
-        void Should_ThrowUnauthorized_When_UserIsNotAuthorized() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
-                    .andDo(print())
-                    .andExpect(status().isUnauthorized());
-        }
-
-        @Test
-        @WithMockUser(authorities = "ADMIN")
-        void Should_ThrowForbidden_When_UserIsAdmin() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
-                    .andDo(print())
-                    .andExpect(status().isForbidden());
-        }
-
-        @Test
-        @WithMockUser(authorities = MOCK_USER_ROLE, username = MOCK_USER_WITHOUT_MONEY)
-        void Should_ReturnAccepted_When_UserHasDefaultUserRole() throws Exception {
-            mockMvc.perform(post("/money-balance/deposit?amount=10.0"))
-                    .andDo(print())
-                    .andExpect(status().isAccepted());
         }
     }
 }
