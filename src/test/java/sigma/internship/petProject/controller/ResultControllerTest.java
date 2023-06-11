@@ -17,8 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(scripts = "/scripts/create-result.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "/scripts/clear-result.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "/scripts/create/create-result.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/scripts/delete/clear-result.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ResultControllerTest {
 
     @Autowired
@@ -40,7 +40,7 @@ public class ResultControllerTest {
 
         @Test
         @WithMockUser(authorities = "USER")
-        void Should_Fail_When_isUser() throws Exception {
+        void Should_ThrowForbidden_When_isUser() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
@@ -49,7 +49,7 @@ public class ResultControllerTest {
 
         @Test
         @WithAnonymousUser
-        void Should_Fail_When_isAnonymousUser() throws Exception {
+        void Should_ThrowUnauthorized_When_isAnonymousUser() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())

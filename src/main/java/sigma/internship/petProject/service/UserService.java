@@ -9,8 +9,6 @@ public interface UserService {
 
     UserDto register(AuthUserDto user);
 
-    boolean checkIfUserExist(String username);
-
     UserDto getUserByUsername(String username);
 
     Page<UserDto> getAllUsers(Pageable pageable);
