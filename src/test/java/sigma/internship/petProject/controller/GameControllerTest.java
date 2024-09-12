@@ -17,8 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(scripts = "/scripts/create-game.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "/scripts/clear-game.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "/scripts/create/create-game.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/scripts/delete/clear-game.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class GameControllerTest {
 
     @Autowired
@@ -34,15 +34,15 @@ class GameControllerTest {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size()").value(2))
+                    .andExpect(jsonPath("$.size()").value(3))
                     .andExpect(jsonPath("$[0].id").value(1))
             ;
         }
 
         @Test
-        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithAnonymousUser
-        void Should_Fail_When_DatabaseIsEmpty() throws Exception {
+        void Should_ThrowInternalServerError_When_DatabaseIsEmpty() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
@@ -57,18 +57,18 @@ class GameControllerTest {
 
         @Test
         @WithMockUser(authorities = "ADMIN")
-        void successful() throws Exception {
+        void Should_ReturnOrderedListWithThreeGames_When_ThereAreThreeGames() throws Exception {
             mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size()").value(2))
+                    .andExpect(jsonPath("$.size()").value(3))
                     .andExpect(jsonPath("$[0].id").value(1))
             ;
         }
 
         @Test
         @WithMockUser(authorities = "USER")
-        void failForUser() throws Exception {
+        void Should_ThrowForbidden_When_IsUser() throws Exception {
             mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
@@ -77,7 +77,7 @@ class GameControllerTest {
 
         @Test
         @WithAnonymousUser
-        void failForAnonymousUser() throws Exception {
+        void Should_ThrowUnauthorized_When_IsAnonymousUser() throws Exception {
             mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
@@ -85,9 +85,9 @@ class GameControllerTest {
         }
 
         @Test
-        @Sql(scripts = {"/scripts/clear-game.sql"})
+        @Sql(scripts = {"/scripts/delete/clear-game.sql"})
         @WithMockUser(authorities = "ADMIN")
-        void Should_Fail_When_DatabaseIsEmpty() throws Exception {
+        void Should_ThrowInternalServerError_When_DatabaseIsEmpty() throws Exception {
             mockMvc.perform(get(DETAILED_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isInternalServerError())
@@ -99,7 +99,7 @@ class GameControllerTest {
     public class FindById {
         @Test
         @WithAnonymousUser
-        void successful() throws Exception {
+        void Should_ReturnExpectedGame_When_IdIsProvided() throws Exception {
             int expectedId = 1;
             mockMvc.perform(get(REQUEST_MAPPING + "/" + expectedId))
                     .andDo(print())
@@ -110,7 +110,7 @@ class GameControllerTest {
 
         @Test
         @WithAnonymousUser
-        void failNotFound() throws Exception {
+        void Should_ThrowNotFound_When_NoGameFoundWithNotExistingId() throws Exception {
             mockMvc.perform(get(REQUEST_MAPPING + "/10"))
                     .andDo(print())
                     .andExpect(status().isNotFound())

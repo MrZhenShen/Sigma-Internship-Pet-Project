@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -40,8 +41,8 @@ public class GameSession {
     @JoinColumn(name = "player_id", nullable = false, referencedColumnName = "id")
     private User player;
 
-    @OneToMany
-    @JoinColumn(name = "round_id", nullable = false, unique = true)
+    @OneToMany(mappedBy="gameSession")
+    @ToString.Exclude
     private Set<Round> rounds;
 
     @Column(name = "create_date", nullable = false)

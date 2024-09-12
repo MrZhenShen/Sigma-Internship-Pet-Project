@@ -22,8 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Sql(scripts = "/scripts/create-users.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "/scripts/clear-user.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "/scripts/create/create-user.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/scripts/delete/clear-user.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserControllerTest {
 
     @Autowired
@@ -105,7 +105,7 @@ public class UserControllerTest {
         }
 
         @Test
-        void Should_Fail_When_AuthUserDtoExists() throws Exception {
+        void Should_ThrowConflict_When_AuthUserDtoExists() throws Exception {
             AuthUserDto user = new AuthUserDto(0, "userTest", "joe@email.com", "joe");
 
             mockMvc.perform(post(REQUEST_MAPPING)
@@ -166,13 +166,13 @@ public class UserControllerTest {
             mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content.size()").value(2))
+                    .andExpect(jsonPath("$.content.size()").value(4))
             ;
         }
 
         @Test
         @WithMockUser(authorities = "USER")
-        void Should_Fail_When_isUser() throws Exception {
+        void Should_ThrowForbidden_When_isUser() throws Exception {
             mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isForbidden())
@@ -181,7 +181,7 @@ public class UserControllerTest {
 
         @Test
         @WithAnonymousUser
-        void Should_Fail_When_isAnonymousUser() throws Exception {
+        void Should_ThrowUnauthorized_When_isAnonymousUser() throws Exception {
             mockMvc.perform(get(ALL_REQUEST_SUBMAPPING))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())

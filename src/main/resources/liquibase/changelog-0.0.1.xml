@@ -152,4 +152,47 @@
         </update>
     </changeSet>
 
+    <changeSet author="yevhen-rozhylo" id="5-insert-default-games">
+        <insert tableName="game">
+            <column name="title" value="Spin"/>
+            <column name="description" value="Spin the spin and get one of the prizes"/>
+            <column name="is_one_user_action" valueBoolean="true"/>
+            <column name="winning" valueNumeric="0.5"/>
+            <column name="cost" valueNumeric="10"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+        <insert tableName="game">
+            <column name="title" value="Ticket"/>
+            <column name="description" value="Wipe cells to get prise"/>
+            <column name="is_one_user_action" valueBoolean="false"/>
+            <column name="winning" valueNumeric="0.8"/>
+            <column name="cost" valueNumeric="50"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+        <insert tableName="game">
+            <column name="title" value="Lot"/>
+            <column name="description" value="3 cherries are the best your friends"/>
+            <column name="is_one_user_action" valueBoolean="true"/>
+            <column name="winning" valueNumeric="0.1"/>
+            <column name="cost" valueNumeric="100"/>
+            <column name="create_date" valueDate="current_timestamp"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="6-delete-round_id-from-round-table" author="yevhen-rozhylo">
+        <dropForeignKeyConstraint baseTableName="round" constraintName="FK_ROUND_ON_ROUND"/>
+        <dropUniqueConstraint tableName="round" constraintName="uc_round_round"/>
+        <dropColumn tableName="round" columnName="round_id"/>
+    </changeSet>
+
+    <changeSet id="7-add-game_session_id-to-round-table" author="yevhen-rozhylo">
+        <addColumn tableName="round">
+            <column name="game_session_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="round" baseColumnNames="game_session_id"
+                                 referencedTableName="game_session" referencedColumnNames="id"
+                                 constraintName="FK_GAMESESSION_ON_ROUND"/>
+
+    </changeSet>
+
 </databaseChangeLog>

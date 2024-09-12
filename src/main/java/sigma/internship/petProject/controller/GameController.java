@@ -16,7 +16,7 @@ import sigma.internship.petProject.service.GameService;
 
 import java.util.List;
 
-@Tag(name = "Game controller")
+@Tag(name = "Game Controller")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/game")

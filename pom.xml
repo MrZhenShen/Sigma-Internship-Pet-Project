@@ -19,6 +19,7 @@
 		<pmd.version>3.20.0</pmd.version>
 		<openapi.version>1.6.14</openapi.version>
 		<jacoco.version>0.8.8</jacoco.version>
+		<validation.version>2.7.3</validation.version>
 	</properties>
 	<dependencies>
 		<dependency>
