@@ -6,3 +6,20 @@
    execute `docker compose up` in `docker/` folder
 3) In IntelliJ "Preferences...", under Build, Execution, Deployment > Build Tools > Maven > Runner, select the option "Delegate IDE build/run actions to Maven."
 4) Run Application by starting Main class
+
+## Running in a Local Environment
+
+1. Open [Swagger UI](http://localhost:8080/swagger-ui/index.html) in your browser.
+2. Sign in using one of the following credentials:
+   - **Admin access**: Enter `admin` as the username to authorize with administrator privileges.
+   - **User access**: Enter `user` as the username to authorize with general user privileges.
+
+> **Note:** Before running the application locally, ensure the following versions are installed or supported on your machine:
+>
+> - **Java**: 17
+> - **Maven**: Compatible with Maven 3.6+ (required for plugin compatibility)
+> - **Spring Boot**: 2.7.5 (defined in the parent POM)
+> - **MapStruct**: 1.5.3.Final
+> - **PMD**: 3.20.0
+> - **OpenAPI (springdoc-openapi)**: 1.6.14
+> - **JaCoCo**: 0.8.8
